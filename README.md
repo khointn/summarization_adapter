@@ -42,29 +42,22 @@ The adapter is integrated into the base model via [the **PEFT** library](https:/
 
 ## 2. Data and Formats
 
-The model accepts **plain text documents** as input. This works use the **billsum** dataset [1]:
+The model accepts **plain text documents** as input. This works use the **dailymail** dataset [1] and the **billsum** dataset [2].
 
-| Split     | Number of Examples | Notes                                               |
-| --------- | ------------------ | --------------------------------------------------- |
-| `train`   | ~18,900            | Main train set |
-| `test`    | ~3,270             | Test set |
-| `ca_test` | ~1,240             | Additional test subset |
-| **Total** | ~23,500            | Total data samples |
-
-[1]: https://huggingface.co/datasets/FiscalNote/billsum "FiscalNote/billsum · Datasets at Hugging Face"
+[1]: https://huggingface.co/datasets/abisee/cnn_dailymail "CNN Dailymail · Datasets at Hugging Face"
+[2]: https://huggingface.co/datasets/FiscalNote/billsum "FiscalNote/billsum · Datasets at Hugging Face"
 
 
 ```json
 {
-  "text": "Full legal documentation text",
-  "summary": "Summary of the text",
-  "title":  "An act to amend Section xxx."
+  "article": "Full legal documentation text",
+  "highlights": "Summary of the text"
 }
 ```
 
-In this work, I use ```text``` and ```summary``` as the main data to train the model. When training, documents longer than the model's maximum sequence length will be **chunked** into overlapping segments.
+When training, documents longer than the model's maximum sequence length will be **chunked** into overlapping segments.
 
-The adapter produces a concise ```summary``` as plain text from the given ```text```. 
+The adapter produces a ```summary``` as plain text from the given ```article```. 
 
 ## 3. Evaluation Metrics
 
