@@ -87,7 +87,12 @@ For training:
 
 For evaluation:
 ```bash
-(adapter_venv) python -m src.evaluate
+(adapter_venv) python -m src.evaluate --pretrained_model <PRETRAINED_MODEL> --output_model <OUTPUT_MODEL_PATH>
+```
+
+For inference:
+```bash
+(adapter_venv) python -m src.infer
 ```
 <!-- ## 6. Challenges and Solutions
 
