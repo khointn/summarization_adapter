@@ -75,7 +75,7 @@ def load_data(tokenizer, config, is_eval=False) -> Tuple:
     else:
         ds_raw = load_dataset("cnn_dailymail", "1.0.0", cache_dir=config["data_dir"])
 
-    train_ds_raw, val_ds_raw, test_ds_raw = ds_raw["train"].select(range(50000)), ds_raw["validation"].select(range(5000)), ds_raw["test"]
+    train_ds_raw, val_ds_raw, test_ds_raw = ds_raw["train"].select(range(50000)), ds_raw["validation"].select(range(5000)), ds_raw["test"].select(range(1000))
     logger.info(f"Done loading. Train samples: {len(train_ds_raw)}, Val samples: {len(val_ds_raw)}")
 
     if not is_eval:

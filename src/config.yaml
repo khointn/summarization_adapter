@@ -7,15 +7,15 @@ data_dir: "./data"
 output_base_dir: "./output_models"
 
 # data / sequence
-max_input_tokens: 512
+max_input_tokens: 384
 max_target_tokens: 128
 text_col: "article"
 summary_col: "highlights"
 
 # training
-batch_size: 8
+batch_size: 4
 grad_accum: 8
-learning_rate: 0.00002 # 2e-5
+learning_rate: 0.000005 # 2e-5
 epochs: 4
 warmup_ratio: 0.03
 eval_steps: 200

@@ -11,7 +11,7 @@ from peft import LoraConfig, get_peft_model, PeftModel
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def load_model(config: Dict, mode: Literal["train", "eval"] = "train") -> Tuple:
+def load_model(config: Dict, mode: Literal["train", "eval"] = "train", is_pretrained: bool = False) -> Tuple:
     logger.info("Load base model and tokenizer")
     
     if mode=="train":
@@ -71,9 +71,11 @@ def load_model(config: Dict, mode: Literal["train", "eval"] = "train") -> Tuple:
 
         # reload base model
         base_model = AutoModelForCausalLM.from_pretrained(config["base_model"], torch_dtype=torch.bfloat16)
-
-        # attach LoRA weights from checkpoint
-        adapter_model = PeftModel.from_pretrained(base_model, config["model"])
+        if is_pretrained:
+            adapter_model = base_model
+        else:
+            # attach LoRA weights from checkpoint
+            adapter_model = PeftModel.from_pretrained(base_model, config["model"])
 
         # (optional) merge for faster inference
         try:
