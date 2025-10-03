@@ -1,29 +1,32 @@
-# Base model and output
-PRETRAINED_MODEL: "Qwen/Qwen3-0.6B"
-DATA_DIR: "./data"
-OUTPUT_BASE_DIR: "./output_models"
+# wandb for logging
+wandb_project: "summarization_adapter"
 
-# Data / sequence
-MAX_INPUT_TOKENS: 384
-MAX_TARGET_TOKENS: 128
-TEXT_COL: "text"
-SUMMARY_COL: "summary"
+# base model and output
+model: "Qwen/Qwen3-0.6B"
+data_dir: "./data"
+output_base_dir: "./output_models"
 
-# Training
-BATCH_SIZE: 2
-GRAD_ACCUM: 8
-LEARNING_RATE: 2e-5
-EPOCHS: 4
-WARMUP_RATIO: 0.03
-EVAL_STEPS: 400
-LOGGING_STEPS: 400
-SEED: 42
-LOAD_4BIT: true
+# data / sequence
+max_input_tokens: 384
+max_target_tokens: 128
+text_col: "text"
+summary_col: "summary"
 
-# LoRA config
-LORA_R: 8
-LORA_ALPHA: 16
-LORA_DROPOUT: 0.05
+# training
+batch_size: 2
+grad_accum: 8
+learning_rate: 0.00002 # 2e-5
+epochs: 4
+warmup_ratio: 0.03
+eval_steps: 400
+logging_steps: 400
+seed: 42
+load_4bit: true
 
-# Optimizer
-OPTIM: "adamw_bnb_8bit"
+# lora config
+lora_r: 8
+lora_alpha: 16
+lora_dropout: 0.05
+
+# optimizer
+optim: "adamw_bnb_8bit"
