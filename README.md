@@ -1,6 +1,6 @@
 # SLMs Summarization Adapter
 
-This repository provides code for **summarization adapter** built to work on top of language model (Qwen-3 0.6B, Qwen-3 1.7B).  The adapter provides concise summaries for long documents while avoiding the need to fine‑tune all of the base model's weights.  It leverages parameter‑efficient fine‑tuning (LoRA) to insert a small number of trainable parameters into a frozen base model. 
+This repository provides code for **summarization adapter** built to work on top of language model (Qwen-3 0.6B, Qwen-3 1.7B).  The adapter provides summaries for long documents while avoiding the need to fine‑tune all of the base model's weights.  It leverages parameter‑efficient fine‑tuning (LoRA) to insert a small number of trainable parameters into a frozen base model. 
 
 ---
 
