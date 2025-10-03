@@ -50,7 +50,7 @@ The model accepts **plain text documents** as input. This works use the **dailym
 
 ```json
 {
-  "article": "Full legal documentation text",
+  "article": "Full article text",
   "highlights": "Summary of the text"
 }
 ```

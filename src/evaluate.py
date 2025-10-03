@@ -125,7 +125,7 @@ def eval_adapter(config) -> None:
     name=config["run_name"],
     config=config)
         
-    adapter_model, tokenizer = load_model(config, mode="eval")
+    adapter_model, tokenizer = load_model(config, mode="eval", is_pretrained=False)
     _, val_ds, _ = load_data(tokenizer, config, is_eval=True)
     logger.info("Done setup model and data. Start evaluation.")
 
