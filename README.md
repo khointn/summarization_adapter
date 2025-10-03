@@ -42,7 +42,7 @@ The adapter is integrated into the base model via [the **PEFT** library](https:/
 
 ## 2. Data and Formats
 
-The summarization adapter accepts **plain text documents** as input. This works use the **billsum** dataset [1]:
+The model accepts **plain text documents** as input. This works use the **billsum** dataset [1]:
 
 | Split     | Number of Examples | Notes                                               |
 | --------- | ------------------ | --------------------------------------------------- |
