@@ -8,6 +8,7 @@ import wandb
 from transformers import (
     TrainingArguments,
     Trainer,
+    EarlyStoppingCallback
 )
 
 from src.load_data import load_data
@@ -20,16 +21,14 @@ def load_config(args) -> dict:
     with open("src/config.yaml", "r") as f:
         config = yaml.safe_load(f)
 
-    print(config)
     if args.pretrained_model is not None:
         config["model"] = args.pretrained_model
 
     model_name = config["model"].split("/")[-1].lower()
     run_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{model_name}-lora-ctx{config['max_input_tokens']}-drp{config['lora_dropout']}-r{config['lora_r']}"
-    
-    config["model_name"] = model_name
     config["run_name"] = run_name
     config["output_dir"] = os.path.join(config["output_base_dir"], run_name)
+    print(config)
 
     return config
 
@@ -39,7 +38,7 @@ def train_adapter(config) -> None:
     name=config["run_name"],
     config=config)
         
-    adapter_model, tokenizer = load_model(config)
+    adapter_model, tokenizer = load_model(config, mode="train")
     train_ds, val_ds, data_collator = load_data(tokenizer, config)
     logger.info("Done setup model and data. Start training.")
 
@@ -77,6 +76,7 @@ def train_adapter(config) -> None:
         eval_dataset=val_ds,
         tokenizer=tokenizer,
         data_collator=data_collator,
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=5)]
         # compute_metrics=compute_metrics,
     )
 
