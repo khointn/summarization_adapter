@@ -93,7 +93,6 @@ def streaming_eval(
             torch.tensor(labels_padded, dtype=torch.long), skip_special_tokens=True
         )
 
-        # Minimal post-processing for ROUGE-Lsum
         decoded_preds = [p.strip() for p in decoded_preds]
         decoded_refs  = [r.strip() for r in decoded_refs]
         decoded_preds = ["\n".join(p.splitlines()) for p in decoded_preds]
