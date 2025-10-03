@@ -8,6 +8,7 @@ import wandb
 from transformers import (
     TrainingArguments,
     Trainer,
+    EarlyStoppingCallback
 )
 
 from src.load_data import load_data
@@ -75,6 +76,7 @@ def train_adapter(config) -> None:
         eval_dataset=val_ds,
         tokenizer=tokenizer,
         data_collator=data_collator,
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=5)]
         # compute_metrics=compute_metrics,
     )
 

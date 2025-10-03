@@ -15,9 +15,9 @@ logger = logging.getLogger(__name__)
 
 # Prompt template
 INSTR_PREFIX = (
-    "You are a helpful assistant that writes concise, faithful summaries of legislative text.\n\n"
-    "Task: Read the following bill text and write a clear, accurate summary.\n\n"
-    "Bill Text:\n"
+    "You are a helpful assistant that writes concise summaries of the given article.\n\n"
+    "Task: Read the following article text and write a clear, accurate summary.\n\n"
+    "Article:\n"
 )
 RESPONSE_PREFIX = "\n\nSummary:"
 
@@ -65,23 +65,28 @@ class DataCollatorForCausalLMWithMaskedLabels:
             "labels": torch.tensor(labels, dtype=torch.long),
         }
     
-def load_data(tokenizer, config) -> Tuple:
+def load_data(tokenizer, config, is_eval=False) -> Tuple:
     logger.info("Load and tokenize dataset...")
     set_seed(config["seed"])
 
     if not os.path.exists(config["data_dir"]):
-        ds_raw = load_dataset("billsum")
+        ds_raw = load_dataset("cnn_dailymail", "1.0.0")
         ds_raw.save_to_disk(config["data_dir"])
     else:
-        ds_raw = load_dataset("billsum", cache_dir=config["data_dir"])
+        ds_raw = load_dataset("cnn_dailymail", "1.0.0", cache_dir=config["data_dir"])
 
-    train_ds_raw, val_ds_raw = ds_raw["train"], ds_raw["test"]
+    train_ds_raw, val_ds_raw, test_ds_raw = ds_raw["train"].select(range(50000)), ds_raw["validation"].select(range(5000)), ds_raw["test"].select(range(1000))
     logger.info(f"Done loading. Train samples: {len(train_ds_raw)}, Val samples: {len(val_ds_raw)}")
 
-    train_ds = train_ds_raw.map(lambda ex: tokenize_and_mask(ex, tokenizer, config),
-                                remove_columns=train_ds_raw.column_names, desc="Tokenize train")
-    val_ds   = val_ds_raw.map(lambda ex: tokenize_and_mask(ex, tokenizer, config),
-                            remove_columns=val_ds_raw.column_names, desc="Tokenize eval")
+    if not is_eval:
+        train_ds = train_ds_raw.map(lambda ex: tokenize_and_mask(ex, tokenizer, config),
+                                    remove_columns=train_ds_raw.column_names, desc="Tokenize train")
+        val_ds = val_ds_raw.map(lambda ex: tokenize_and_mask(ex, tokenizer, config),
+                                remove_columns=val_ds_raw.column_names, desc="Tokenize eval")
+    else:
+        train_ds = None
+        val_ds = test_ds_raw.map(lambda ex: tokenize_and_mask(ex, tokenizer, config),
+                        remove_columns=test_ds_raw.column_names, desc="Tokenize test")
 
     data_collator = DataCollatorForCausalLMWithMaskedLabels(tokenizer=tokenizer, pad_to_multiple_of=8)
     return train_ds, val_ds, data_collator

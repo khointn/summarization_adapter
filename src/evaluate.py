@@ -2,15 +2,13 @@ import os
 import gc
 from argparse import ArgumentParser
 import torch
-import evaluate
+import numpy as np
 import yaml
 import logging
+from tqdm import tqdm
 
 import wandb
-from transformers import (
-    TrainingArguments,
-    Trainer,
-)
+import evaluate
 
 from src.load_data import load_data
 from src.load_model import load_model
@@ -41,7 +39,6 @@ def streaming_eval(
     model,
     tokenizer,
     val_ds,
-    n_samples=256,
     batch_size=1,
     max_input_ctx=512,
     max_new_tokens=128,
@@ -51,8 +48,8 @@ def streaming_eval(
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     model.eval().to(device)
 
-    end = min(n_samples, len(val_ds))
-    for start in range(0, end, batch_size):
+    end = len(val_ds)
+    for start in tqdm(range(0, end, batch_size)):
         stop = min(start + batch_size, end)
         batch = val_ds.select(range(start, stop))
 
@@ -96,23 +93,22 @@ def streaming_eval(
             torch.tensor(labels_padded, dtype=torch.long), skip_special_tokens=True
         )
 
-        # 6) Minimal post-processing for ROUGE-Lsum
         decoded_preds = [p.strip() for p in decoded_preds]
         decoded_refs  = [r.strip() for r in decoded_refs]
         decoded_preds = ["\n".join(p.splitlines()) for p in decoded_preds]
         decoded_refs  = ["\n".join(r.splitlines()) for r in decoded_refs]
 
-        # 7) Stream into metrics (no big lists kept)
+        # add by batch
         rouge_metric.add_batch(predictions=decoded_preds, references=decoded_refs)
         bleu_metric.add_batch(predictions=decoded_preds, references=[[r] for r in decoded_refs])
 
-        # 8) Free everything we can
+        # Free mem
         del batch_input, batch_attn, gen
         if torch.cuda.is_available() and (start // batch_size) % clear_cuda_every == 0:
             torch.cuda.empty_cache()
         gc.collect()
 
-    # 9) Compute final metrics
+    # compute metrics
     rouge = rouge_metric.compute(use_stemmer=True)
     bleu  = bleu_metric.compute()
     return {
@@ -130,18 +126,18 @@ def eval_adapter(config) -> None:
     config=config)
         
     adapter_model, tokenizer = load_model(config, mode="eval")
-    _, val_ds, _ = load_data(tokenizer, config)
+    _, val_ds, _ = load_data(tokenizer, config, is_eval=True)
     logger.info("Done setup model and data. Start evaluation.")
 
     scores = streaming_eval(
         adapter_model,
         tokenizer,
         val_ds,
-        n_samples=100,
-        batch_size=1,
-        max_input_ctx=512,
+        batch_size=16,
+        # max_input_ctx=512,
         max_new_tokens=128,
     )
+
     print(scores)
 
 if __name__ == "__main__":
@@ -155,6 +151,7 @@ if __name__ == "__main__":
                         type=str, 
                         required=True,
                         help="Path to the trained model")
+
     args = parser.parse_args()
 
     config = load_config(args)
